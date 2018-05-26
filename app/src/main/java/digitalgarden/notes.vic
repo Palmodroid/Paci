@@ -1,0 +1,127 @@
+@s7[Adatbázis kezelő]
+
+@s5[PILLS table létrehozása]
+
+A @it[PILLS] tábla csupán a gyógyszerek neveit tartalmazza, szerkezetileg megegyezik az @it[AUTHORS] táblával.
+
+@it[manifest]-ben létrehozzuk a kezelő activity-t:
+<code>
+<activity
+	android:theme="@style/AppTheme.NoActionBar"
+	android:name="digitalgarden.librarydb.PillsControllActivity"
+	android:label="@string/pills_title" >
+</activity>
+</code>
+@it[library_strings.xml]-ben hozzáadjuk a hiányzó címet:
+<code><string name="pills_title">Pills</string></code>
+
+Létrehozzuk (másolással) a hiányzó @it[activity]-t és a két @it[fragment]-et:
+@bo[PillsControllActivity] - @bo[Authors...]-t @bo[Pills...]-re cseréljük 
+@bo[PillsEditFragment] - csere ugyanígy (kis- és nagybetűkre vigyázzunk!)
+A @bo[setupListButton(...)] rész még nem szükséges
+@bo[PillsListFragment] - csere ugyanígy (kis- és nagybetűkre vigyázzunk!)
+Érdemes a példákat is módosítani.
+
+Létrehozzuk a két @it[res/layout]-ot:
+@bo[pill_edit_fragment_form.xml]
+<code>
+tools:context=".librarydb.PillsControllActivity"...
+	android:id="@+id/title_pill_name"...
+	android:text="@string/title_pill_name"...
+	android:id="@+id/edittext_pill_name"...
+	android:hint="@string/hint_pill_name" />
+</code>
+@bo[library_strings.xml] - jobb a teljes megnevezést kiírni, csak akkor ne felejtsük el módosítani az id hivatkozásokat is!
+<code>
+<string name="title_pill_name">Name:</string>
+<string name="hint_pill_name">author\'s name</string>
+</code>
+
+@bo[pill_list_row_view.xml]
+!! FONTOS !! Ez nincs kompletten elkészítve, csak a @bo[pill] átírása és @it[layout_below] módosítása szükséges.
+
+@bo[database/LibraryDatabaseHelper] kiegészítése:
+<code>
+public static final class PillsTable implements BaseColumns
+	{
+	private PillsTable() {} // Cannot instantiate class
+	...
+	public static final String TABLENAME = "pills";
+	public static final int TABLEID = 0x400;
+	...
+	private static final String CONTENT_SUBTYPE = "vnd.digitalgarden.librarydb.contentprovider.pill";
+	}
+</code>
+Az új táblát az @it[onCreate()] és @it[onUpgrade()] metódusokban is el kell helyezni. 
+
+@bo[contentprovider/LibraryContentProvider] kiegészítése:
+<code>static...
+sURIMatcher.addURI(AuthorsTable.AUTHORITY, AuthorsTable.TABLENAME, AuthorsTable.DIRID);
+sURIMatcher.addURI(AuthorsTable.AUTHORITY, AuthorsTable.TABLENAME + "/#", AuthorsTable.ITEMID);
+sURIMatcher.addURI(AuthorsTable.AUTHORITY, AuthorsTable.TABLENAME + AuthorsTable.CONTENT_COUNT, AuthorsTable.COUNTID);
+</code>
+(Az @it[import] részt is ki kell egészíteni!)
+@bo[insert()] részben @it[case PillsTable.DIRID], cserével
+@bo[delete()] részben @it[case PillsTable.DIRID és .ITEMID], cserével
+@bo[update()] részben @it[case PillsTable.DIRID és .ITEMID], cserével
+@bo[update()] részben @it[case PillsTable.DIRID és .ITEMID], cserével
+@bo[query()] részben @it[case PillsTable.DIRID, .ITEMID és .COUNTID], cserével
+
+Végül a @it[MainChooserActivity]-ból elérhetővé kell tenni az új osztályt!
+<code>
+findViewById(R.id.button_pills_table).setOnClickListener(new OnClickListener()
+	{
+	public void onClick(View view)
+		{
+		Logger.title("MAINCHOOSER: Pills table called");
+		Intent i = new Intent();
+		i.setClass( MainChooserActivity.this, PillsControllActivity.class );
+		startActivity( i );
+		}
+	});
+</code>
+A @it[main_chooser_activity.xml]-et kiegészíteni
+<code>
+<Button
+	android:id="@+id/button_pills_table"
+	android:text="@string/button_pills_table"...
+</code>
+Ne felejtsük el az @it[android:layout_below] értékeket is megfelelően módosítani!
+
+A @it[main_chooser_activity_strings.xml]-et kiegészíteni
+<code><string name="button_pills_table">Pills</string></code>
+
+
+@s5[PATIENTS table létrehozása]
+
+Minden lényeges adatot a @it[database/LibraryDatabaseHelper] osztály fog össze.
+  - Valószínűleg a @it[DATABAS_VERSION] értéket növelni kell, de ezt nem tudom
+  - Létre kell hozni egy @it[PatientsTable] osztályt
+    - @it[TABLENAME] megadása
+    - @it[TABLEID] értéke 0x100-val növekszik
+    - @it[CONTENT_SUBTYPE] módosítása
+    - @it[TABLECREATE] érték alapján összerakjuk a mezőket, ill. ennek megfelelően a mező azonosítókat elkészítjük. (@it[FULL...] párjukkal egyben)
+  - @it[onCreate()] - @bo[db.execSQL( PatientsTable.TABLECREATE );]
+  - @it[onUpgrade] - @bo[db.execSQL("DROP TABLE IF EXISTS " + PatientsTable.TABLENAME );]
+  
+A @it[contentprovider/LibraryContentProvider] osztály tartalmazza az egyes táblák CRUD metódusait.
+  - @bo[import digitalgarden.librarydb.database.LibraryDatabaseHelper.PatientsTable;]
+  - @it[static] rész három sorát ki kell tölteni:@bo[
+  	sURIMatcher.addURI(PatientsTable.AUTHORITY, PatientsTable.TABLENAME, PatientsTable.DIRID);
+	sURIMatcher.addURI(PatientsTable.AUTHORITY, PatientsTable.TABLENAME + "/#", PatientsTable.ITEMID);
+	sURIMatcher.addURI(PatientsTable.AUTHORITY, PatientsTable.TABLENAME + PatientsTable.CONTENT_COUNT, PatientsTable.COUNTID);]
+  - @it[insert()] metódus @bo[PatientsTable.DIRID] ága (books alapján)
+  !! FONTOS !! A keresés metódusa ennél összetettebb kell legyen!
+  - @it[delete()] metódus @bo[PatientsTable.DIRID és ITEMID] ága (books alapján)
+  - @it[update()] metódus @bo[PatientsTable.ITEMID] ága (books alapján) @bo[DIRID] nem megengedett
+  - @it[query()] metódus @bo[PatientsTable.DIRID, ITEMID és COUNTID] ága (inkább authors alapján, mert abban nincs hivatkozás)
+  
+@it[MainChooserActivity] osztályban egy új gombot kell létrehozni, egyúttal módosítva a @it[main_chooser_activity] és @it[main_chooser_activity_strings] értékeit is. 
+  - Három osztályt kell elkészíteni: @it[PatientsControllActivity], @it[PatientsEditFragment] és @it[PatientsListFragment]
+  - @it[PatientsControllActivity] - csak a hivatkozások szövegét kellett módosítani. Viszont az activity-t be kell jegyezni a @it[manifest]-be, ill. a @it[library_strings]-ben hozzá kell adni a @bo[patients_title] szövegét is.
+  - @it[PatientsListFragment] - értelemszerűen kell átalakítani, de hozzá tartozik a @it[patient_list_row_view] elkészítése is,
+  - @it[PatientsEditFragment] módosítása mellett létre kell hozni a @it[patient_edit_fragment_form]-ot, ill. a @it[library_strings]-ben a megfelelő stringeket  
+  
+Az @it[exportimport] könyvtárba kerülnek a mentéssel/visszatöltéssel kapcsolatos rutinok.
+  - A @it[PatientsTableExportImport] módosítása szükséges, alapvetően az authors alapján, de több sorral.
+  - itt további módosítás is kell, de az még nincs kész -

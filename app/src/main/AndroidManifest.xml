@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="digitalgarden">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <provider
+            android:name="digitalgarden.librarydb.contentprovider.LibraryContentProvider"
+            android:authorities="digitalgarden.librarydb.contentprovider"
+            android:exported="false">
+        </provider>
+
+        <activity
+            android:name="digitalgarden.librarydb.MainChooserActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:theme="@style/AppTheme.NoActionBar"
+            android:name="digitalgarden.librarydb.BooksControllActivity"
+            android:label="@string/books_title" >
+        </activity>
+
+        <activity
+            android:theme="@style/AppTheme.NoActionBar"
+            android:name="digitalgarden.librarydb.AuthorsControllActivity"
+            android:label="@string/authors_title" >
+        </activity>
+
+        <activity
+            android:theme="@style/AppTheme.NoActionBar"
+            android:name="digitalgarden.librarydb.PillsControllActivity"
+            android:label="@string/pills_title" >
+        </activity>
+
+        <activity
+            android:theme="@style/AppTheme.NoActionBar"
+            android:name="digitalgarden.librarydb.PatientsControllActivity"
+            android:label="@string/patients_title" >
+        </activity>
+
+        <activity
+            android:name="digitalgarden.selectfile.SelectFileActivity"
+            android:label="@string/app_name" >
+        </activity>
+
+        <activity
+            android:name="digitalgarden.paci.PaciActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
+         </activity>
+    </application>
+
+</manifest>
