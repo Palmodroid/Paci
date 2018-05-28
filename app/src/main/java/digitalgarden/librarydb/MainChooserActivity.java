@@ -82,6 +82,19 @@ public class MainChooserActivity extends FragmentActivity
 				}
 			});
 
+		findViewById(R.id.button_medications_table).setOnClickListener(new OnClickListener()
+			{
+			public void onClick(View view)
+				{
+				Logger.title("MAINCHOOSER: Medications table called");
+
+				Intent i = new Intent();
+
+				i.setClass( MainChooserActivity.this, MedicationsControllActivity.class );
+				startActivity( i );
+				}
+			});
+
 		findViewById(R.id.button_export).setOnClickListener(new OnClickListener()
     		{
     		public void onClick(View view) 

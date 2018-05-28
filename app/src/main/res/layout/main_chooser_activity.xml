@@ -54,13 +54,22 @@
 			android:layout_centerHorizontal="true" />
 
 		<Button
+			android:id="@+id/button_medications_table"
+			android:text="@string/button_medications_table"
+			android:minEms="10"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/button_pills_table"
+			android:layout_centerHorizontal="true" />
+
+		<Button
 	        android:id="@+id/button_export"
 	       	android:text="@string/button_export"
 	        android:minEms="10"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="20dp"
-	        android:layout_below="@id/button_pills_table"
+	        android:layout_below="@id/button_medications_table"
 	        android:layout_centerHorizontal="true" />
 	
 	    <Button

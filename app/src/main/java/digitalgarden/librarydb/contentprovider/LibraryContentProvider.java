@@ -13,10 +13,12 @@ import android.text.TextUtils;
 import digitalgarden.librarydb.database.LibraryDatabaseHelper;
 import digitalgarden.librarydb.database.LibraryDatabaseHelper.AuthorsTable;
 import digitalgarden.librarydb.database.LibraryDatabaseHelper.BooksTable;
+import digitalgarden.librarydb.database.LibraryDatabaseHelper.MedicationsTable;
 import digitalgarden.librarydb.database.LibraryDatabaseHelper.PatientsTable;
 import digitalgarden.librarydb.database.LibraryDatabaseHelper.PillsTable;
 import digitalgarden.logger.Logger;
 import digitalgarden.utils.StringUtils;
+
 
 
 public class LibraryContentProvider extends ContentProvider
@@ -45,6 +47,10 @@ public class LibraryContentProvider extends ContentProvider
 		sURIMatcher.addURI(PillsTable.AUTHORITY, PillsTable.TABLENAME, PillsTable.DIRID);
 		sURIMatcher.addURI(PillsTable.AUTHORITY, PillsTable.TABLENAME + "/#", PillsTable.ITEMID);
 		sURIMatcher.addURI(PillsTable.AUTHORITY, PillsTable.TABLENAME + PillsTable.CONTENT_COUNT, PillsTable.COUNTID);
+
+		sURIMatcher.addURI(MedicationsTable.AUTHORITY, MedicationsTable.TABLENAME, MedicationsTable.DIRID);
+		sURIMatcher.addURI(MedicationsTable.AUTHORITY, MedicationsTable.TABLENAME + "/#", MedicationsTable.ITEMID);
+		sURIMatcher.addURI(MedicationsTable.AUTHORITY, MedicationsTable.TABLENAME + MedicationsTable.CONTENT_COUNT, MedicationsTable.COUNTID);
 		}
 
 	
@@ -138,6 +144,21 @@ public class LibraryContentProvider extends ContentProvider
 			return Uri.parse(PillsTable.CONTENT_URI + "/" + id);
 			}
 
+		case MedicationsTable.DIRID:
+			{
+			// Az ekezet nelkuli kereseshez meg egy oszlop hozzakerul
+			values.put( MedicationsTable.SEARCH, StringUtils.normalize(
+					values.getAsString( MedicationsTable.NAME ) ));
+
+			SQLiteDatabase libraryDb = libraryDbDatabaseHelper.getWritableDatabase();
+			id = libraryDb.insert( MedicationsTable.TABLENAME, null, values );
+
+			getContext().getContentResolver().notifyChange(uri, null);
+
+			Logger.note("CONTENTPROVIDER: " + id + " inserted into MEDICATIONS");
+			return Uri.parse(MedicationsTable.CONTENT_URI + "/" + id);
+			}
+
     	default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
 			}
@@ -223,6 +244,24 @@ public class LibraryContentProvider extends ContentProvider
 			else
 				{
 				rowsDeleted = libraryDb.delete( PillsTable.TABLENAME, PillsTable._ID + "=" + id + " and " + whereClause, whereArgs);
+				}
+			break;
+			}
+
+		case MedicationsTable.DIRID:
+			rowsDeleted = libraryDb.delete(MedicationsTable.TABLENAME, whereClause, whereArgs);
+			break;
+
+		case MedicationsTable.ITEMID:
+			{
+			String id = uri.getLastPathSegment();
+			if (TextUtils.isEmpty(whereClause))
+				{
+				rowsDeleted = libraryDb.delete( MedicationsTable.TABLENAME, MedicationsTable._ID + "=" + id, null);
+				}
+			else
+				{
+				rowsDeleted = libraryDb.delete( MedicationsTable.TABLENAME, MedicationsTable._ID + "=" + id + " and " + whereClause, whereArgs);
 				}
 			break;
 			}
@@ -408,6 +447,43 @@ public class LibraryContentProvider extends ContentProvider
 			break;
 			}
 
+		case MedicationsTable.DIRID:
+			{
+			// Nem biztosítható, hogy a search rész működőképes marad!
+			throw new IllegalArgumentException("Multiple updates on MEDICATIONS are not allowed: " + uri);
+			/* rowsUpdated = libraryDb.update( MedicationsTable.TABLENAME,
+			values,
+			whereClause,
+			whereArgs);
+			break; */
+			}
+
+		case MedicationsTable.ITEMID:
+			{
+			// Az ekezet nelkuli kereseshez meg egy oszlop hozzakerul
+			values.put( MedicationsTable.SEARCH, StringUtils.normalize(
+					values.getAsString( MedicationsTable.NAME ) ));
+
+			String id = uri.getLastPathSegment();
+			if (TextUtils.isEmpty(whereClause))
+				{
+				rowsUpdated = libraryDb.update( MedicationsTable.TABLENAME,
+						values,
+						MedicationsTable._ID  + "=" + id,
+						null);
+				}
+			else
+				{
+				rowsUpdated = libraryDb.update( MedicationsTable.TABLENAME,
+						values,
+						MedicationsTable._ID  + "=" + id
+								+ " and "
+								+ whereClause,
+						whereArgs);
+				}
+			break;
+			}
+
 		default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
 			}
@@ -514,7 +590,7 @@ public class LibraryContentProvider extends ContentProvider
 			queryBuilder.setTables( PillsTable.TABLENAME );
 			// Adding the ID to the original query
 			queryBuilder.appendWhere( PillsTable._ID  + "=" + uri.getLastPathSegment());
-			logger = "ONE AUTHOR ITEM";
+			logger = "ONE PILL ITEM";
 			break;
 
 		case PillsTable.COUNTID:
@@ -523,6 +599,28 @@ public class LibraryContentProvider extends ContentProvider
 			projection = new String[] { "count(*) as count" };
 			// Projectiont át kell alakítani!
 			logger = "PILLS COUNT";
+			break;
+
+		case MedicationsTable.DIRID:
+			// Set the table
+			queryBuilder.setTables( MedicationsTable.TABLENAME );
+			logger = "ALL MEDICATIONS";
+			break;
+
+		case MedicationsTable.ITEMID:
+			// Set the table
+			queryBuilder.setTables( MedicationsTable.TABLENAME );
+			// Adding the ID to the original query
+			queryBuilder.appendWhere( MedicationsTable._ID  + "=" + uri.getLastPathSegment());
+			logger = "ONE MEDICATION ITEM";
+			break;
+
+		case MedicationsTable.COUNTID:
+			// Set the table
+			queryBuilder.setTables( MedicationsTable.TABLENAME );
+			projection = new String[] { "count(*) as count" };
+			// Projectiont át kell alakítani!
+			logger = "MEDICATIONS COUNT";
 			break;
 
 		default:

@@ -6,6 +6,7 @@
     <string name="authors_title">Authors</string>
     <string name="patients_title">Patients</string>
     <string name="pills_title">Pills</string>
+    <string name="medications_title">Medications</string>
 
 	<string name="select_author">"Select author for "</string>
 	<string name="books_of">"Books of "</string>
@@ -22,7 +23,10 @@
     <string name="hint_name">author\'s name</string>
 
     <string name="title_pill_name">Name:</string>
-    <string name="hint_pill_name">author\'s name</string>
+    <string name="hint_pill_name">pill\'s name</string>
+
+    <string name="title_medication_name">Name:</string>
+    <string name="hint_medication_name">medication\'s name</string>
 
     <string name="title_patient_name">Name:</string>
     <string name="title_patient_dob">DOB:</string>

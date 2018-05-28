@@ -15,7 +15,7 @@ import digitalgarden.logger.Logger;
 public class LibraryDatabaseHelper extends SQLiteOpenHelper 
 	{
 	// Database Version & Name
-	public static final int DATABASE_VERSION = 8;
+	public static final int DATABASE_VERSION = 9;
 	public static final String DATABASE_NAME = "library";
 
 	
@@ -195,6 +195,42 @@ public class LibraryDatabaseHelper extends SQLiteOpenHelper
 		}
 
 
+	public static final class MedicationsTable implements BaseColumns
+		{
+		private MedicationsTable() {} // Cannot instantiate class
+
+		public static final String TABLENAME = "medications";
+		public static final int TABLEID = 0x500;
+
+		public static final String NAME = "name";
+		public static final String SEARCH = "search";
+
+		public static final String FULL_ID = TABLENAME + "." + _ID;
+		public static final String FULL_NAME = TABLENAME + "." + NAME;
+		public static final String FULL_SEARCH = TABLENAME + "." + SEARCH;
+
+		static final String TABLECREATE =
+				"CREATE TABLE " + TABLENAME + " (" +
+						_ID + " INTEGER PRIMARY KEY, " +
+						NAME + " TEXT," +
+						SEARCH + " TEXT" + ")";
+
+		public static final String AUTHORITY = LibraryDatabaseHelper.AUTHORITY;
+		public static final String CONTENT_COUNT = LibraryDatabaseHelper.CONTENT_COUNT;
+
+		private static final String CONTENT_SUBTYPE = "vnd.digitalgarden.librarydb.contentprovider.medication";
+		public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_SUBTYPE;
+		public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_SUBTYPE;
+
+		public static final Uri CONTENT_URI = Uri.parse( "content://" + AUTHORITY + "/" + TABLENAME );
+		public static final Uri CONTENT_COUNT_URI = Uri.parse(CONTENT_URI + CONTENT_COUNT);
+
+		public static final int COUNTID = TABLEID + 1;
+		public static final int DIRID = TABLEID + 2;
+		public static final int ITEMID = TABLEID + 3;
+		}
+
+
 	public LibraryDatabaseHelper(Context context)
 		{
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -209,12 +245,14 @@ public class LibraryDatabaseHelper extends SQLiteOpenHelper
 				", Create Authors table: " + AuthorsTable.TABLECREATE +
 				", Create Patients table: " + PatientsTable.TABLECREATE +
 				", Create Pills table: " + PillsTable.TABLECREATE +
+				", Create Medications table: " + MedicationsTable.TABLECREATE +
 				", Locale: " + Locale.getDefault().toString());
 		
 		db.execSQL( AuthorsTable.TABLECREATE );
 		db.execSQL( BooksTable.TABLECREATE );
 		db.execSQL( PatientsTable.TABLECREATE );
 		db.execSQL( PillsTable.TABLECREATE );
+		db.execSQL( MedicationsTable.TABLECREATE );
 		// SQLException - mivel a string konstans, nem feltétlenül kell lekezelni!
 
 		db.setLocale( Locale.getDefault() );
@@ -231,6 +269,7 @@ public class LibraryDatabaseHelper extends SQLiteOpenHelper
 		db.execSQL("DROP TABLE IF EXISTS " + AuthorsTable.TABLENAME );
 		db.execSQL("DROP TABLE IF EXISTS " + PatientsTable.TABLENAME );
 		db.execSQL("DROP TABLE IF EXISTS " + PillsTable.TABLENAME );
+		db.execSQL("DROP TABLE IF EXISTS " + MedicationsTable.TABLENAME );
 		// SQLException - mivel a string konstans, nem feltétlenül kell lekezelni!
 		
 		// Create tables again
