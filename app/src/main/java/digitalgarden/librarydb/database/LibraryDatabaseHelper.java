@@ -15,7 +15,7 @@ import digitalgarden.logger.Logger;
 public class LibraryDatabaseHelper extends SQLiteOpenHelper 
 	{
 	// Database Version & Name
-	public static final int DATABASE_VERSION = 9;
+	public static final int DATABASE_VERSION = 1;
 	public static final String DATABASE_NAME = "library";
 
 	
@@ -81,7 +81,7 @@ public class LibraryDatabaseHelper extends SQLiteOpenHelper
 		public static final String TABLENAME = "authors";
 		public static final int TABLEID = 0x200;
 	
-		public static final String NAME = "name";
+		public static final String NAME = "authorname";
 		public static final String SEARCH = "search";	
 		
 		public static final String FULL_ID = TABLENAME + "." + _ID;
@@ -117,7 +117,7 @@ public class LibraryDatabaseHelper extends SQLiteOpenHelper
 		public static final String TABLENAME = "patients";
 		public static final int TABLEID = 0x300;
 
-		public static final String NAME = "name";
+		public static final String NAME = "patientname";
 		public static final String DOB = "dob";
 		public static final String TAJ = "taj";
 		public static final String PHONE = "phone";
@@ -166,7 +166,7 @@ public class LibraryDatabaseHelper extends SQLiteOpenHelper
 		public static final String TABLENAME = "pills";
 		public static final int TABLEID = 0x400;
 
-		public static final String NAME = "name";
+		public static final String NAME = "pillname";
 		public static final String SEARCH = "search";
 
 		public static final String FULL_ID = TABLENAME + "." + _ID;
@@ -202,18 +202,30 @@ public class LibraryDatabaseHelper extends SQLiteOpenHelper
 		public static final String TABLENAME = "medications";
 		public static final int TABLEID = 0x500;
 
-		public static final String NAME = "name";
+		public static final String NAME = "name5";
+		public static final String PILL_ID = "pill_id";
+		public static final String PATIENT_ID = "patient_id";
 		public static final String SEARCH = "search";
 
 		public static final String FULL_ID = TABLENAME + "." + _ID;
 		public static final String FULL_NAME = TABLENAME + "." + NAME;
+		public static final String FULL_PILL_ID = TABLENAME + "." + PILL_ID;
+		public static final String FULL_PATIENT_ID = TABLENAME + "." + PATIENT_ID;
 		public static final String FULL_SEARCH = TABLENAME + "." + SEARCH;
 
+		// http://stackoverflow.com/a/15422557 - FOREIGN KEY CSAK AZ UTOLSÓ LEHET!
 		static final String TABLECREATE =
 				"CREATE TABLE " + TABLENAME + " (" +
 						_ID + " INTEGER PRIMARY KEY, " +
 						NAME + " TEXT," +
-						SEARCH + " TEXT" + ")";
+						SEARCH + " TEXT, " +
+						PILL_ID + " INTEGER, " +
+						PATIENT_ID + " INTEGER, " +
+						" FOREIGN KEY (" + PILL_ID + ")" +
+						" REFERENCES " + PillsTable.TABLENAME + " (" + PillsTable._ID + ")" +
+						" FOREIGN KEY (" + PATIENT_ID + ")" +
+						" REFERENCES " + PatientsTable.TABLENAME + " (" + PatientsTable._ID + ")" +
+						")";
 
 		public static final String AUTHORITY = LibraryDatabaseHelper.AUTHORITY;
 		public static final String CONTENT_COUNT = LibraryDatabaseHelper.CONTENT_COUNT;

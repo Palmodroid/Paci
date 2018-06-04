@@ -42,16 +42,22 @@ class AsyncTaskExport extends TimeConsumingAsyncTask
 
 		GeneralTableExportImport authorsExport = new AuthorsTableExportImport( applicationContext );
 		GeneralTableExportImport booksExport = new BooksTableExportImport( applicationContext );
-		
+		GeneralTableExportImport pillsExport = new PillsTableExportImport( applicationContext );
+		GeneralTableExportImport patientsExport = new PatientsTableExportImport( applicationContext );
+		GeneralTableExportImport medicationsExport = new MedicationsTableExportImport( applicationContext );
+
 		// Elkérjük az adatokat, ezt majd a finally-ban zárjuk le
-		int authorsCount = authorsExport.collateRows();
-		int booksCount = booksExport.collateRows();
+		int count = authorsExport.collateRows();
+		count += booksExport.collateRows();
+		count += pillsExport.collateRows();
+		count += patientsExport.collateRows();
+		count += medicationsExport.collateRows();
 
 		// Itt állítjuk be a progress végértékét a 2. paraméter használatával
 		int cnt = 0;
-		publishProgress( cnt, authorsCount + booksCount );
+		publishProgress( cnt, count );
 
-    	if ( authorsCount + booksCount == 0 )
+    	if ( count == 0 )
     		{
     		// Üres az adatbázis, de végigfutunk, és a feljlécet kiírjuk
    			setReturnedMessage( R.string.msg_error_database_empty);
@@ -98,8 +104,44 @@ class AsyncTaskExport extends TimeConsumingAsyncTask
 				if (isCancelled())
 					break;
 				}
-				
-			bufferedWriter.flush();	
+
+            while ( (data=pillsExport.getNextRow()) != null )
+                {
+                Logger.note("AsyncTaskEXPORT exporting: " + data);
+                // http://stackoverflow.com/questions/5949926/what-is-the-difference-between-append-and-write-methods-of-java-io-writer
+                bufferedWriter.append( data );
+
+                publishProgress( ++cnt );
+
+                if (isCancelled())
+                    break;
+                }
+
+            while ( (data=patientsExport.getNextRow()) != null )
+                {
+                Logger.note("AsyncTaskEXPORT exporting: " + data);
+                // http://stackoverflow.com/questions/5949926/what-is-the-difference-between-append-and-write-methods-of-java-io-writer
+                bufferedWriter.append( data );
+
+                publishProgress( ++cnt );
+
+                if (isCancelled())
+                    break;
+                }
+
+            while ( (data=medicationsExport.getNextRow()) != null )
+                {
+                Logger.note("AsyncTaskEXPORT exporting: " + data);
+                // http://stackoverflow.com/questions/5949926/what-is-the-difference-between-append-and-write-methods-of-java-io-writer
+                bufferedWriter.append( data );
+
+                publishProgress( ++cnt );
+
+                if (isCancelled())
+                    break;
+                }
+
+            bufferedWriter.flush();
 			}
 		catch (IOException ioe)
 			{
@@ -108,9 +150,12 @@ class AsyncTaskExport extends TimeConsumingAsyncTask
 		finally 
 			{
 			// Always close the cursor
+            medicationsExport.close();
+            patientsExport.close();
+            pillsExport.close();
 			booksExport.close();
 			authorsExport.close();
-			
+
 			if (bufferedWriter != null) 
 				{
 				try 

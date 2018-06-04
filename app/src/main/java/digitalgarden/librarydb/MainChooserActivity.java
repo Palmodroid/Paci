@@ -8,15 +8,16 @@ import android.view.View.OnClickListener;
 
 import java.io.File;
 
+import digitalgarden.R;
 import digitalgarden.librarydb.MainChooserDialogFragment.Type;
 import digitalgarden.librarydb.exportimport.AsyncTaskDialogFragment;
 import digitalgarden.logger.Logger;
-import digitalgarden.R;
+import digitalgarden.permission.PermissionRequestDialog;
 import digitalgarden.selectfile.SelectFileActivity;
 import digitalgarden.selectfile.SelectFileActivity.Mode;
 
 
-public class MainChooserActivity extends FragmentActivity
+public class MainChooserActivity extends FragmentActivity implements PermissionRequestDialog.OnPermissionRequestFinished
 	{
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -28,94 +29,115 @@ public class MainChooserActivity extends FragmentActivity
 		
 		Logger.title("LibraryDb started");
 
-		setContentView(R.layout.main_chooser_activity);
-		
-		findViewById(R.id.button_authors_table).setOnClickListener(new OnClickListener()
-    		{
-    		public void onClick(View view) 
-    			{
-    			Logger.title("MAINCHOOSER: Authors table called");
+        PermissionRequestDialog permissionRequestDialog =
+                (PermissionRequestDialog)getFragmentManager().findFragmentByTag("dialog");
+        if ( permissionRequestDialog == null )
+            {
+            //Scribe.debug(Debug.PERMISSION, "Permission dialog is not found, it should be recreated!");
+            permissionRequestDialog = PermissionRequestDialog.newInstance();
+            // permissionRequestDialog.setRetainInstance(true); - do not need to retain
+            // testDialog.setCancelable(false);
+            permissionRequestDialog.show( getFragmentManager(), "dialog");
+            }
 
-				Intent i = new Intent();
-
-				i.setClass( MainChooserActivity.this, AuthorsControllActivity.class );
-				startActivity( i );
-    			} 
-    		});
-			
-		findViewById(R.id.button_books_table).setOnClickListener(new OnClickListener()
-    		{
-			public void onClick(View view) 
-    			{
-    			Logger.title("MAINCHOOSER: Books table called");
-
-				Intent i = new Intent();
-
-				i.setClass( MainChooserActivity.this, BooksControllActivity.class );
-				startActivity( i );
-    			} 
-    		});
-
-		findViewById(R.id.button_patients_table).setOnClickListener(new OnClickListener()
-			{
-			public void onClick(View view)
-				{
-				Logger.title("MAINCHOOSER: Patients table called");
-
-				Intent i = new Intent();
-
-				i.setClass( MainChooserActivity.this, PatientsControllActivity.class );
-				startActivity( i );
-				}
-			});
-
-		findViewById(R.id.button_pills_table).setOnClickListener(new OnClickListener()
-			{
-			public void onClick(View view)
-				{
-				Logger.title("MAINCHOOSER: Pills table called");
-
-				Intent i = new Intent();
-
-				i.setClass( MainChooserActivity.this, PillsControllActivity.class );
-				startActivity( i );
-				}
-			});
-
-		findViewById(R.id.button_medications_table).setOnClickListener(new OnClickListener()
-			{
-			public void onClick(View view)
-				{
-				Logger.title("MAINCHOOSER: Medications table called");
-
-				Intent i = new Intent();
-
-				i.setClass( MainChooserActivity.this, MedicationsControllActivity.class );
-				startActivity( i );
-				}
-			});
-
-		findViewById(R.id.button_export).setOnClickListener(new OnClickListener()
-    		{
-    		public void onClick(View view) 
-    			{
-    			Logger.title("MAINCHOOSER: Export called");
-    			startPorting( PortingType.EXPORT );
-    			} 
-    		});
-
-		findViewById(R.id.button_import).setOnClickListener(new OnClickListener()
-    		{
-    		public void onClick(View view) 
-    			{
-    			Logger.title("MAINCHOOSER: Import called");    			
-       			startPorting( PortingType.IMPORT );
-       			} 
-    		});
 		}
 
-	
-	static enum PortingType
+    @Override
+    public void onPermissionRequestFinish(boolean permissionsGranted)
+        {
+        if (permissionsGranted)
+            {
+            setContentView(R.layout.main_chooser_activity);
+
+            findViewById(R.id.button_authors_table).setOnClickListener(new OnClickListener()
+                {
+                public void onClick(View view)
+                    {
+                    Logger.title("MAINCHOOSER: Authors table called");
+
+                    Intent i = new Intent();
+
+                    i.setClass(MainChooserActivity.this, AuthorsControllActivity.class);
+                    startActivity(i);
+                    }
+                });
+
+            findViewById(R.id.button_books_table).setOnClickListener(new OnClickListener()
+                {
+                public void onClick(View view)
+                    {
+                    Logger.title("MAINCHOOSER: Books table called");
+
+                    Intent i = new Intent();
+
+                    i.setClass(MainChooserActivity.this, BooksControllActivity.class);
+                    startActivity(i);
+                    }
+                });
+
+            findViewById(R.id.button_patients_table).setOnClickListener(new OnClickListener()
+                {
+                public void onClick(View view)
+                    {
+                    Logger.title("MAINCHOOSER: Patients table called");
+
+                    Intent i = new Intent();
+
+                    i.setClass(MainChooserActivity.this, PatientsControllActivity.class);
+                    startActivity(i);
+                    }
+                });
+
+            findViewById(R.id.button_pills_table).setOnClickListener(new OnClickListener()
+                {
+                public void onClick(View view)
+                    {
+                    Logger.title("MAINCHOOSER: Pills table called");
+
+                    Intent i = new Intent();
+
+                    i.setClass(MainChooserActivity.this, PillsControllActivity.class);
+                    startActivity(i);
+                    }
+                });
+
+            findViewById(R.id.button_medications_table).setOnClickListener(new OnClickListener()
+                {
+                public void onClick(View view)
+                    {
+                    Logger.title("MAINCHOOSER: Medications table called");
+
+                    Intent i = new Intent();
+
+                    i.setClass(MainChooserActivity.this, MedicationsControllActivity.class);
+                    startActivity(i);
+                    }
+                });
+
+            findViewById(R.id.button_export).setOnClickListener(new OnClickListener()
+                {
+                public void onClick(View view)
+                    {
+                    Logger.title("MAINCHOOSER: Export called");
+                    startPorting(PortingType.EXPORT);
+                    }
+                });
+
+            findViewById(R.id.button_import).setOnClickListener(new OnClickListener()
+                {
+                public void onClick(View view)
+                    {
+                    Logger.title("MAINCHOOSER: Import called");
+                    startPorting(PortingType.IMPORT);
+                    }
+                });
+            }
+        else
+            finish();
+        }
+
+
+    static enum PortingType
 		{
 		EXPORT,
 		IMPORT

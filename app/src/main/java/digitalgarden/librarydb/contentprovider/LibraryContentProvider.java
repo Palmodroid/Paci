@@ -603,21 +603,33 @@ public class LibraryContentProvider extends ContentProvider
 
 		case MedicationsTable.DIRID:
 			// Set the table
-			queryBuilder.setTables( MedicationsTable.TABLENAME );
+			queryBuilder.setTables( MedicationsTable.TABLENAME +
+					" LEFT OUTER JOIN " + PillsTable.TABLENAME +
+					" ON " + MedicationsTable.FULL_PILL_ID + "=" + PillsTable.FULL_ID +
+					" LEFT OUTER JOIN " + PatientsTable.TABLENAME +
+					" ON " + MedicationsTable.FULL_PATIENT_ID + "=" + PatientsTable.FULL_ID	);
 			logger = "ALL MEDICATIONS";
 			break;
 
 		case MedicationsTable.ITEMID:
 			// Set the table
-			queryBuilder.setTables( MedicationsTable.TABLENAME );
+            queryBuilder.setTables( MedicationsTable.TABLENAME +
+                    " LEFT OUTER JOIN " + PillsTable.TABLENAME +
+                    " ON " + MedicationsTable.FULL_PILL_ID + "=" + PillsTable.FULL_ID +
+                    " LEFT OUTER JOIN " + PatientsTable.TABLENAME +
+                    " ON " + MedicationsTable.FULL_PATIENT_ID + "=" + PatientsTable.FULL_ID	);
 			// Adding the ID to the original query
-			queryBuilder.appendWhere( MedicationsTable._ID  + "=" + uri.getLastPathSegment());
+			queryBuilder.appendWhere( MedicationsTable.FULL_ID  + "=" + uri.getLastPathSegment());
 			logger = "ONE MEDICATION ITEM";
 			break;
 
 		case MedicationsTable.COUNTID:
 			// Set the table
-			queryBuilder.setTables( MedicationsTable.TABLENAME );
+            queryBuilder.setTables( MedicationsTable.TABLENAME +
+                    " LEFT OUTER JOIN " + PillsTable.TABLENAME +
+                    " ON " + MedicationsTable.FULL_PILL_ID + "=" + PillsTable.FULL_ID +
+                    " LEFT OUTER JOIN " + PatientsTable.TABLENAME +
+                    " ON " + MedicationsTable.FULL_PATIENT_ID + "=" + PatientsTable.FULL_ID	);
 			projection = new String[] { "count(*) as count" };
 			// Projectiont át kell alakítani!
 			logger = "MEDICATIONS COUNT";

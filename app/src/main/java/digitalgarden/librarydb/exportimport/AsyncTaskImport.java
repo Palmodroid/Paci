@@ -90,6 +90,9 @@ class AsyncTaskImport extends TimeConsumingAsyncTask
 			
 			AuthorsTableExportImport authorsImport = new AuthorsTableExportImport( applicationContext );
 			BooksTableExportImport booksImport = new BooksTableExportImport( applicationContext );
+			PillsTableExportImport pillsImport = new PillsTableExportImport( applicationContext );
+			PatientsTableExportImport patientsImport = new PatientsTableExportImport( applicationContext );
+			MedicationsTableExportImport medicationsImport = new MedicationsTableExportImport( applicationContext );
 
 			while ( (row=bufferedReader.readLine()) != null )
 				{
@@ -127,7 +130,22 @@ class AsyncTaskImport extends TimeConsumingAsyncTask
 					{
 					booksImport.importRow( records );
 					}
-				
+
+				else if ( records[0].equals( pillsImport.getTableName() ))
+					{
+					pillsImport.importRow( records );
+					}
+
+				else if ( records[0].equals( patientsImport.getTableName() ))
+					{
+					patientsImport.importRow( records );
+					}
+
+				else if ( records[0].equals( medicationsImport.getTableName() ))
+					{
+					medicationsImport.importRow( records );
+					}
+
 				else
 					{
 					Logger.note("[" + row + "]: malformed row skipped!");

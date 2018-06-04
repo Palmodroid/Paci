@@ -5,27 +5,31 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import digitalgarden.R;
+import digitalgarden.librarydb.database.LibraryDatabaseHelper.PatientsTable;
+import digitalgarden.librarydb.database.LibraryDatabaseHelper.PillsTable;
 import digitalgarden.librarydb.database.LibraryDatabaseHelper.MedicationsTable;
 
 public class MedicationsListFragment extends GeneralListFragment
 	{
 	// static factory method
 	// http://www.androiddesignpatterns.com/2012/05/using-newinstance-to-instantiate.html
-	public static GeneralListFragment newInstance( long select )
+	public static GeneralListFragment newInstance( long limit )
 		{
-		GeneralListFragment listFragmenet = new MedicationsListFragment();
+        GeneralListFragment listFragmenet = new MedicationsListFragment();
 
-		Bundle args = new Bundle();
+        Bundle args = new Bundle();
 
-		args.putLong( SELECTED_ITEM, select );
-		// args.putString( LIMITED_COLUMN, null); Sem ez, sem LIMITED_ITEM nem kell!
+        // args.putLong( SELECTED_ITEM , SELECT_DISABLED ); Nincs szelektálás!
 
-		args.putStringArray( FILTERED_COLUMN, new String[] {MedicationsTable.NAME});
-		args.putString( ORDERED_COLUMN, MedicationsTable.NAME);
+        args.putLong( LIMITED_ITEM, limit );
+        args.putString( LIMITED_COLUMN, MedicationsTable.FULL_PILL_ID);
+        args.putString( ORDERED_COLUMN, MedicationsTable.FULL_NAME);
+        // args.putString( FILTERED_COLUMN, BooksTable.FULL_SEARCH);
+        args.putStringArray( FILTERED_COLUMN, new String[] {PillsTable.FULL_SEARCH, MedicationsTable.FULL_SEARCH});
 
-		listFragmenet.setArguments(args);
+        listFragmenet.setArguments(args);
 
-		return listFragmenet;
+        return listFragmenet;
 		}
 
 
@@ -44,8 +48,11 @@ public class MedicationsListFragment extends GeneralListFragment
 	protected String[] getProjection()
 		{
 		String[] projection = new String[] {
-				MedicationsTable._ID,
-				MedicationsTable.NAME };
+                PillsTable.FULL_NAME,
+                PatientsTable.FULL_NAME,
+				PatientsTable.FULL_DOB,
+                MedicationsTable.FULL_NAME,
+                MedicationsTable.FULL_ID };
 
 		return projection;
 		}
@@ -62,6 +69,9 @@ public class MedicationsListFragment extends GeneralListFragment
 		// Fields from the database (projection)
 		// Must include the _id column for the adapter to work
 		String[] from = new String[] {
+            PillsTable.NAME,
+            PatientsTable.NAME,
+            PatientsTable.DOB,
 			MedicationsTable.NAME,
 			MedicationsTable._ID };
 
@@ -73,6 +83,9 @@ public class MedicationsListFragment extends GeneralListFragment
 		{
 		// the XML defined views which the data will be bound to
 		int[] to = new int[] {
+            R.id.pill,
+            R.id.patient,
+            R.id.patient_dob,
 			R.id.medication,
 			R.id.id };
 

@@ -125,3 +125,163 @@ A @it[contentprovider/LibraryContentProvider] osztály tartalmazza az egyes táb
 Az @it[exportimport] könyvtárba kerülnek a mentéssel/visszatöltéssel kapcsolatos rutinok.
   - A @it[PatientsTableExportImport] módosítása szükséges, alapvetően az authors alapján, de több sorral.
   - itt további módosítás is kell, de az még nincs kész -
+  
+@s5[MEDICATION tábla létrehozása] 
+
+Először ugyanúgy elkészítjük, mint a @it[PILLS] táblát.
+Igaz, ezzel a dátum helyett még NAME mezőnk van, de ennek az átírásával várhatunk, amíg a DATE lekezelését elkészítjük.
+
+@it[Foreign key] létrehozása @bo[PILLS] tábla számára.
+
+@it[LibraryDatabaseHelper]
+<code>public static final int DATABASE_VERSION</code> értékét növelni kell, mert az adatbázist változtatjuk.
+@it[MedicationsTable] kiegészítése:
+<code>
+public static final String PILL_ID = "pill_id";
+public static final String FULL_PILL_ID = TABLENAME + "." + PILL_ID;
+static final String TABLECREATE =
+"CREATE TABLE " + TABLENAME + " (" +
+	_ID + " INTEGER PRIMARY KEY, " +
+	NAME + " TEXT," +
+	SEARCH + " TEXT, " +
+	PILL_ID + " INTEGER, " +
+	" FOREIGN KEY (" + PILL_ID + ")" +
+	" REFERENCES " + PillsTable.TABLENAME + " (" + PillsTable._ID + ")" +
+	")";
+</code>
+
+@it[LibraryContentProvider]
+@it[query()] részben a @bo[MedicationsTable.DIRID, .ITEMID és .COUNTID] @it[setTables] része így módosul:
+<code>
+queryBuilder.setTables( BooksTable.TABLENAME + 
+	" LEFT OUTER JOIN " + AuthorsTable.TABLENAME +
+	" ON " + BooksTable.FULL_AUTHOR_ID + "=" + AuthorsTable.FULL_ID );
+</code>
+
+@it[medication_list_row_view] kiegészül
+<code>
+<TextView
+        android:id="@+id/pill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="- pill -"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+</code>
+
+@it[MedicationsListFragment]
+<code>
+public static GeneralListFragment newInstance( long limit )
+	{
+	GeneralListFragment listFragmenet = new MedicationsListFragment();
+
+	Bundle args = new Bundle();
+
+	// args.putLong( SELECTED_ITEM , SELECT_DISABLED ); Nincs szelektálás!
+
+	args.putLong( LIMITED_ITEM, limit );
+	args.putString( LIMITED_COLUMN, MedicationsTable.FULL_PILL_ID);
+	args.putString( ORDERED_COLUMN, PillsTable.FULL_NAME);
+	// args.putString( FILTERED_COLUMN, BooksTable.FULL_SEARCH);
+	args.putStringArray( FILTERED_COLUMN, new String[] {PillsTable.FULL_SEARCH, MedicationsTable.FULL_SEARCH});
+
+	listFragmenet.setArguments(args);
+
+	return listFragmenet;
+	}
+</code>
+A @it[projection] @bo[FULL...] értékeket tartalmaz, és be kell illeszteni (a @it[MedicationsTable] értékei mellett) a @it[PillsTable.FULL_NAME]-t is.
+A @it[get és toForm] értékei között (a @it[MedicationsTable] értékei mellett) a @it[PillsTable.NAME] és @it[R.id.pill] értékeket is meg kell adni.
+
+@it[medication_edit_text_form] kiegészítése:
+<code>
+<TextView
+	android:id="@+id/title_pill"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:text="@string/title_pill"
+	android:textAppearance="?android:attr/textAppearanceMedium" />
+
+<digitalgarden.librarydb.formtypes.ForeignTextField
+	android:id="@+id/edittext_pill"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+
+	android:text="@string/hint_pill"
+
+	android:textAppearance="?android:attr/textAppearanceMedium"
+	android:background="@drawable/border"
+	android:layout_margin="2dp"/>
+</code>
+
+@it[MedicationEditFragment] kiegészítése
+
+Úgy tűnik, csak akkor működik, ha a táblák nem tartalmaznak azonos oszlopnevet. AZ oszlopok nevében ezért a tábla száma is szerepelni fog.
+
+@it[medication_edit_fragment_form] kiegészítése
+<code>
+<TextView
+	android:id="@+id/title_pill"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:text="@string/title_pill"
+	android:textAppearance="?android:attr/textAppearanceMedium" />
+
+<digitalgarden.librarydb.formtypes.ForeignTextField
+	android:id="@+id/edittext_pill"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+
+	android:text="@string/hint_pill"
+
+	android:textAppearance="?android:attr/textAppearanceMedium"
+	android:background="@drawable/border"
+	android:layout_margin="2dp"/>
+</code>
+
+Meg kell adni a @it[library_string]-ben:
+<code>
+<string name="title_pill">Pill:</string>
+<string name="hint_pill">pill\'s name</string>
+
+<string name="select_pill">"Select pill for "</string>
+</code>
+
+<code>
+private ForeignKey pillId = new ForeignKey( PillsTable.CONTENT_URI );
+private ForeignTextField foreignTextPill;
+
+// ForeignKey
+pillId.connect( this );
+pillId.setupSelector( PillsControllActivity.class,
+		getActivity().getString( R.string.select_pill ),
+		medicationNameField );
+
+// ForeignKey
+pillId.connect( this );
+pillId.setupSelector( PillsControllActivity.class,
+		getActivity().getString( R.string.select_pill ),
+		medicationNameField );
+
+// ForeignTextField
+foreignTextPill = (ForeignTextField) view.findViewById(R.id.edittext_pill);
+foreignTextPill.link( pillId, PillsTable.NAME );
+
+int column = cursor.getColumnIndexOrThrow( MedicationsTable.PILL_ID );
+if ( cursor.isNull( column ) )
+	pillId.setValue( -1L );
+else
+	pillId.setValue( cursor.getLong( column ) );
+
+if (pillId.getValue() >= 0)
+	values.put( MedicationsTable.PILL_ID, pillId.getValue());
+else
+	values.putNull( MedicationsTable.PILL_ID );
+
+data.putLong("PILL_ID", pillId.getValue() );
+
+pillId.setValue( data.getLong( "PILL_ID" ) );
+
+pillId.checkReturningSelector( requestCode, selectedId );
+</code>

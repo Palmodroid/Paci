@@ -35,13 +35,11 @@ public class PillsEditFragment extends GeneralEditFragment
         pillNameField = (EditTextField) view.findViewById( R.id.edittext_pill_name );
         pillNameField.connect( this );
 
-    	/*
-		setupListButton( BooksControllActivity.class,
-    			getActivity().getString( R.string.button_books_list ), 
-    			getActivity().getString( R.string.books_of ),
-    			nameField );
-    	*/
-		}
+		setupListButton( MedicationsControllActivity.class,
+    			getActivity().getString( R.string.button_medication_list ),
+    			getActivity().getString( R.string.medications_with ),
+    			pillNameField );
+    	}
 
 	@Override
 	protected void setupFieldsData(long id)

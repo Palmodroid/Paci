@@ -80,7 +80,7 @@ public class PatientsTableExportImport extends GeneralTableExportImport
         values.put( LibraryDatabaseHelper.PatientsTable.NOTE, records[5] );
 
         getContentResolver()
-                .insert( LibraryDatabaseHelper.BooksTable.CONTENT_URI, values);
+                .insert( LibraryDatabaseHelper.PatientsTable.CONTENT_URI, values);
         Logger.debug( "Patient [" + records[1] + "] was inserted.");
 		}
 
